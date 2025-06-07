@@ -5,16 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Structures Quiz Game</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         
         :root {
             --primary: #6c5ce7;
+            --primary-dark: #5649c7;
             --secondary: #a29bfe;
             --accent: #fd79a8;
             --light: #f8f9fa;
+            --lighter: #f1f3f5;
             --dark: #2d3436;
+            --dark-light: #636e72;
             --success: #00b894;
+            --success-light: #55efc4;
             --danger: #d63031;
+            --warning: #fdcb6e;
         }
         
         * {
@@ -32,22 +37,24 @@
             align-items: center;
             padding: 20px;
             overflow-x: hidden;
+            line-height: 1.6;
         }
         
         .quiz-container {
             background-color: white;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 800px;
             overflow: hidden;
             position: relative;
+            transition: all 0.3s ease;
         }
         
         .quiz-header {
             background: linear-gradient(to right, var(--primary), var(--secondary));
             color: white;
-            padding: 20px;
+            padding: 25px 20px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -75,6 +82,29 @@
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .quiz-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .timer {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .timer i {
+            margin-right: 5px;
         }
         
         .progress-container {
@@ -114,7 +144,7 @@
         .question {
             font-size: 1.3rem;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: var(--dark);
             line-height: 1.5;
         }
@@ -127,10 +157,10 @@
         }
         
         .option {
-            background-color: var(--light);
+            background-color: var(--lighter);
             border: 2px solid #e0e0e0;
             border-radius: 12px;
-            padding: 15px;
+            padding: 15px 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
@@ -143,6 +173,7 @@
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             border-color: var(--secondary);
+            background-color: var(--light);
         }
         
         .option.selected {
@@ -152,25 +183,33 @@
         }
         
         .option.correct {
-            background-color: var(--success);
-            color: white;
+            background-color: var(--success-light);
+            color: var(--dark);
             border-color: var(--success);
+            animation: pulse 0.5s;
         }
         
         .option.wrong {
-            background-color: var(--danger);
+            background-color: #ff7675;
             color: white;
             border-color: var(--danger);
         }
         
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
         .option input[type="radio"] {
-            margin-right: 10px;
-            transform: scale(1.2);
-            accent-color: white;
+            margin-right: 15px;
+            transform: scale(1.3);
+            accent-color: var(--primary);
+            pointer-events: none;
         }
 
         .option.selected input[type="radio"] {
-            accent-color: var(--primary);
+            accent-color: white;
         }
         
         .navigation {
@@ -180,7 +219,7 @@
         }
         
         button {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             padding: 12px 25px;
@@ -190,6 +229,9 @@
             font-weight: 700;
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         button:hover {
@@ -202,6 +244,55 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+            opacity: 0.7;
+        }
+        
+        button.secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: none;
+        }
+        
+        button.secondary:hover {
+            background: var(--lighter);
+        }
+        
+        .question-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .question-nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--lighter);
+            color: var(--dark);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+        }
+        
+        .question-nav-btn:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .question-nav-btn.answered {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .question-nav-btn.current {
+            box-shadow: 0 0 0 3px var(--accent);
         }
         
         .result-container {
@@ -253,40 +344,132 @@
             border-radius: 50%;
         }
         
+        .review-container {
+            margin-top: 30px;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .review-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: var(--lighter);
+        }
+        
+        .review-question {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        .review-answer {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        .correct-answer {
+            background-color: var(--success-light);
+            color: var(--dark);
+        }
+        
+        .user-answer {
+            background-color: #ff7675;
+            color: white;
+            margin-right: 10px;
+        }
+        
+        .review-correct {
+            background-color: var(--success-light);
+        }
+        
+        .review-incorrect {
+            background-color: #ff7675;
+        }
+        
         @media (max-width: 768px) {
             .quiz-container {
                 border-radius: 15px;
             }
             
+            .quiz-header {
+                padding: 20px 15px;
+            }
+            
+            .question-container {
+                padding: 20px 15px;
+            }
+            
             .question {
                 font-size: 1.1rem;
+                margin-bottom: 20px;
             }
             
             .option {
-                padding: 12px;
+                padding: 12px 15px;
+            }
+            
+            .option input[type="radio"] {
+                margin-right: 10px;
+                transform: scale(1.1);
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .question-nav-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+            
+            .score {
+                font-size: 3.5rem;
+            }
+            
+            .feedback {
+                font-size: 1.2rem;
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="quiz-container">
         <div class="quiz-header">
             <h1>Data Structures Quiz Game</h1>
+            <div class="quiz-meta">
+                <div class="timer">
+                    <i class="fas fa-clock"></i>
+                    <span id="time">00:00</span>
+                </div>
+                <div id="score-display">Score: 0</div>
+            </div>
             <div class="progress-container">
                 <div class="progress-bar" id="progress"></div>
             </div>
         </div>
         
+        <div class="question-nav" id="question-nav"></div>
+        
         <div class="result-container">
             <div class="emoji" id="emoji">🎉</div>
             <div class="score" id="final-score">0%</div>
             <div class="feedback" id="feedback">Good, but you can do better!</div>
+            <div id="time-result"></div>
             <button id="restart">Play Again</button>
+            <button id="review-btn" class="secondary">Review Answers</button>
+            <div class="review-container" id="review-container"></div>
         </div>
     </div>
 
     <script>
-        // Quiz data
+        // Quiz data with 0-based indexing for answers
         const quizData = [
             {
                 question: "What principle does a Stack follow?",
@@ -296,7 +479,8 @@
                     "Last In First Out (LIFO)",
                     "First In Last Out (FILO)"
                 ],
-                answer: 2
+                answer: 2, // LIFO
+                explanation: "A stack follows the Last In First Out (LIFO) principle where the last element added is the first one to be removed."
             },
             {
                 question: "Which operation inserts an element onto the top of a stack?",
@@ -306,7 +490,8 @@
                     "enqueue()",
                     "push()"
                 ],
-                answer: 3
+                answer: 3, // push()
+                explanation: "The push() operation adds an element to the top of the stack."
             },
             {
                 question: "What is the time complexity of a for loop that iterates n times, such as for(i=0; i<n; i++)?",
@@ -316,7 +501,8 @@
                     "O(n)",
                     "O(1)"
                 ],
-                answer: 2
+                answer: 2, // O(n)
+                explanation: "A simple loop that runs n times has linear time complexity O(n)."
             },
             {
                 question: "Which data structure is defined as a linear data structure that follows the First In First Out (FIFO) principle?",
@@ -326,7 +512,8 @@
                     "Linked List",
                     "Queue"
                 ],
-                answer: 3
+                answer: 3, // Queue
+                explanation: "A queue follows the First In First Out (FIFO) principle where the first element added is the first one to be removed."
             },
             {
                 question: "What is a disadvantage of Array Lists (Dynamic Arrays)?",
@@ -336,7 +523,8 @@
                     "Costly insertions/deletions in the middle",
                     "No dynamic resizing"
                 ],
-                answer: 2
+                answer: 2, // Costly insertions/deletions in the middle
+                explanation: "Array lists have O(1) access time but O(n) time for insertions/deletions in the middle as elements need to be shifted."
             },
             {
                 question: "Which type of linked list is not mentioned in the document?",
@@ -346,7 +534,8 @@
                     "Multi-way Linked List",
                     "Doubly Linked List"
                 ],
-                answer: 2
+                answer: 2, // Multi-way Linked List
+                explanation: "Singly, Doubly, and Circular linked lists are common types, while Multi-way is not a standard linked list type."
             },
             {
                 question: "In a Binary Search Tree (BST), what is the relationship between the left child, root, and right child?",
@@ -356,7 +545,8 @@
                     "Left = Root = Right",
                     "Left < Root < Right"
                 ],
-                answer: 3
+                answer: 3, // Left < Root < Right
+                explanation: "In a BST, for any node, all elements in the left subtree are less than the node, and all elements in the right subtree are greater."
             },
             {
                 question: "What is a core operation of a Queue?",
@@ -366,7 +556,8 @@
                     "dequeue()",
                     "delete()"
                 ],
-                answer: 2
+                answer: 2, // dequeue()
+                explanation: "The dequeue() operation removes an element from the front of the queue."
             },
             {
                 question: "What is an advantage of Linked Lists compared to Array Lists?",
@@ -376,7 +567,8 @@
                     "Dynamic resizing",
                     "Direct access to elements"
                 ],
-                answer: 1
+                answer: 1, // Efficient insertions/deletions
+                explanation: "Linked lists have O(1) insertion/deletion time at known positions, while array lists require O(n) time for the same operations."
             },
             {
                 question: "What is a disadvantage of Binary Search Trees?",
@@ -386,7 +578,8 @@
                     "Cannot store duplicate values",
                     "Requires more memory per node than a linked list"
                 ],
-                answer: 1
+                answer: 1, // Can degrade to linear time in unbalanced trees
+                explanation: "BST operations are O(log n) in balanced trees but can degrade to O(n) in unbalanced trees (like a linked list)."
             }
         ];
 
@@ -398,14 +591,29 @@
         const feedback = document.getElementById('feedback');
         const emoji = document.getElementById('emoji');
         const restartBtn = document.getElementById('restart');
+        const reviewBtn = document.getElementById('review-btn');
+        const reviewContainer = document.getElementById('review-container');
+        const questionNav = document.getElementById('question-nav');
+        const timeDisplay = document.getElementById('time');
+        const scoreDisplay = document.getElementById('score-display');
+        const timeResult = document.getElementById('time-result');
 
         // Quiz state
         let currentQuestionIndex = 0;
         let score = 0;
         let userAnswers = Array(quizData.length).fill(null);
+        let startTime;
+        let timerInterval;
+        let quizCompleted = false;
 
         // Initialize the quiz
         function initQuiz() {
+            // Reset state
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = Array(quizData.length).fill(null);
+            quizCompleted = false;
+            
             // Clear any existing questions
             const existingQuestions = document.querySelectorAll('.question-container');
             existingQuestions.forEach(q => q.remove());
@@ -429,8 +637,12 @@
                     <div class="question">${index + 1}. ${question.question}</div>
                     <div class="options">${optionsHTML}</div>
                     <div class="navigation">
-                        <button class="prev-btn" ${index === 0 ? 'disabled' : ''}>Previous</button>
-                        <button class="next-btn" disabled>${index === quizData.length - 1 ? 'Finish' : 'Next'}</button>
+                        <button class="prev-btn" ${index === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button class="next-btn" disabled>
+                            ${index === quizData.length - 1 ? 'Finish <i class="fas fa-flag-checkered"></i>' : 'Next <i class="fas fa-arrow-right"></i>'}
+                        </button>
                     </div>
                 `;
                 
@@ -438,9 +650,61 @@
                 quizContainer.insertBefore(questionContainer, resultContainer);
             });
             
+            // Create question navigation
+            createQuestionNav();
+            
             // Add event listeners
             addEventListeners();
             updateProgress();
+            updateScoreDisplay();
+            
+            // Hide results
+            resultContainer.classList.remove('show');
+            reviewContainer.innerHTML = '';
+            
+            // Start timer
+            startTimer();
+        }
+
+        // Create question navigation buttons
+        function createQuestionNav() {
+            questionNav.innerHTML = '';
+            quizData.forEach((_, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'question-nav-btn';
+                if (index === 0) btn.classList.add('current');
+                btn.textContent = index + 1;
+                btn.addEventListener('click', () => navigateToQuestion(index));
+                questionNav.appendChild(btn);
+            });
+        }
+
+        // Navigate to specific question
+        function navigateToQuestion(index) {
+            if (quizCompleted) return;
+            
+            // Hide current question
+            document.getElementById(`question-${currentQuestionIndex}`).classList.remove('active');
+            
+            // Update current question index
+            currentQuestionIndex = index;
+            
+            // Show new question
+            document.getElementById(`question-${currentQuestionIndex}`).classList.add('active');
+            
+            // Update navigation buttons
+            updateNavigationButtons();
+            updateQuestionNav();
+        }
+
+        // Update question navigation buttons
+        function updateQuestionNav() {
+            const navButtons = document.querySelectorAll('.question-nav-btn');
+            navButtons.forEach((btn, index) => {
+                btn.classList.remove('current', 'answered');
+                if (index === currentQuestionIndex) btn.classList.add('current');
+                if (userAnswers[index] !== null) btn.classList.add('answered');
+            });
         }
 
         // Add event listeners
@@ -462,16 +726,22 @@
             
             // Restart button
             restartBtn.addEventListener('click', restartQuiz);
+            
+            // Review button
+            reviewBtn.addEventListener('click', toggleReview);
         }
 
         // Handle option selection
         function selectOption(e) {
             const option = e.currentTarget;
-            const questionIndex = parseInt(option.parentElement.parentElement.id.split('-')[1]);
+            const questionContainer = option.closest('.question-container');
+            if (!questionContainer) return;
+            
+            const questionIndex = parseInt(questionContainer.id.split('-')[1]);
             const optionIndex = parseInt(option.dataset.index);
             
             // Deselect all options in this question
-            document.querySelectorAll(`#question-${questionIndex} .option`).forEach(opt => {
+            questionContainer.querySelectorAll('.option').forEach(opt => {
                 opt.classList.remove('selected');
                 opt.querySelector('input').checked = false;
             });
@@ -481,11 +751,14 @@
             option.querySelector('input').checked = true;
             userAnswers[questionIndex] = optionIndex;
             
-            // Enable next button - FIX APPLIED HERE
-            const nextButton = document.querySelector(`#question-${questionIndex} .next-btn`);
-            if (nextButton) { // Check if the element was found before attempting to use it
+            // Enable next button
+            const nextButton = questionContainer.querySelector('.next-btn');
+            if (nextButton) {
                 nextButton.disabled = false;
             }
+            
+            // Update question nav
+            updateQuestionNav();
         }
 
         // Go to next question
@@ -512,6 +785,7 @@
             // Update navigation buttons
             updateNavigationButtons();
             updateProgress();
+            updateQuestionNav();
         }
 
         // Go to previous question
@@ -526,6 +800,7 @@
             // Update navigation buttons
             updateNavigationButtons();
             updateProgress();
+            updateQuestionNav();
         }
 
         // Update navigation buttons
@@ -534,7 +809,7 @@
             const nextButton = document.querySelector(`#question-${currentQuestionIndex} .next-btn`);
             
             if (prevButton) prevButton.disabled = currentQuestionIndex === 0;
-            if (nextButton) nextButton.disabled = userAnswers[currentQuestionIndex] === null;
+            if (nextButton) nextButton.disabled = userAnswers[currentQuestionIndex] === null && currentQuestionIndex !== quizData.length - 1;
         }
 
         // Update progress bar
@@ -543,8 +818,40 @@
             progressBar.style.width = `${progress}%`;
         }
 
+        // Update score display
+        function updateScoreDisplay() {
+            const answeredCount = userAnswers.filter(answer => answer !== null).length;
+            scoreDisplay.textContent = `Progress: ${answeredCount}/${quizData.length}`;
+        }
+
+        // Start timer
+        function startTimer() {
+            clearInterval(timerInterval);
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Update timer display
+        function updateTimer() {
+            if (quizCompleted) return;
+            
+            const currentTime = new Date();
+            const elapsedTime = Math.floor((currentTime - startTime) / 1000);
+            const minutes = Math.floor(elapsedTime / 60).toString().padStart(2, '0');
+            const seconds = (elapsedTime % 60).toString().padStart(2, '0');
+            timeDisplay.textContent = `${minutes}:${seconds}`;
+        }
+
+        // Stop timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
         // Show results
         function showResults() {
+            quizCompleted = true;
+            stopTimer();
+            
             // Calculate score
             score = 0;
             quizData.forEach((question, index) => {
@@ -557,6 +864,13 @@
             
             // Display results
             finalScore.textContent = `${percentage}%`;
+            
+            // Calculate time taken
+            const endTime = new Date();
+            const elapsedTime = Math.floor((endTime - startTime) / 1000);
+            const minutes = Math.floor(elapsedTime / 60);
+            const seconds = elapsedTime % 60;
+            timeResult.textContent = `Time taken: ${minutes}m ${seconds}s`;
             
             // Set feedback based on score
             if (percentage >= 90) {
@@ -580,6 +894,55 @@
             if (percentage >= 70) {
                 createConfetti();
             }
+        }
+
+        // Toggle review answers
+        function toggleReview() {
+            if (reviewContainer.innerHTML === '') {
+                showReview();
+                reviewBtn.innerHTML = '<i class="fas fa-times"></i> Hide Review';
+            } else {
+                reviewContainer.innerHTML = '';
+                reviewBtn.innerHTML = '<i class="fas fa-list"></i> Review Answers';
+            }
+        }
+
+        // Show review of answers
+        function showReview() {
+            reviewContainer.innerHTML = '<h3>Review Your Answers</h3>';
+            
+            quizData.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.answer;
+                
+                const reviewItem = document.createElement('div');
+                reviewItem.className = `review-item ${isCorrect ? 'review-correct' : 'review-incorrect'}`;
+                
+                let answerHtml = '';
+                if (userAnswer !== null) {
+                    if (!isCorrect) {
+                        answerHtml += `
+                            <div>Your answer: <span class="review-answer user-answer">${question.options[userAnswer]}</span></div>
+                        `;
+                    }
+                    answerHtml += `
+                        <div>Correct answer: <span class="review-answer correct-answer">${question.options[question.answer]}</span></div>
+                    `;
+                } else {
+                    answerHtml += `
+                        <div>You didn't answer this question.</div>
+                        <div>Correct answer: <span class="review-answer correct-answer">${question.options[question.answer]}</span></div>
+                    `;
+                }
+                
+                reviewItem.innerHTML = `
+                    <div class="review-question">${index + 1}. ${question.question}</div>
+                    ${answerHtml}
+                    <div class="review-explanation"><strong>Explanation:</strong> ${question.explanation}</div>
+                `;
+                
+                reviewContainer.appendChild(reviewItem);
+            });
         }
 
         // Create confetti effect
@@ -620,6 +983,8 @@
             
             // Hide results
             resultContainer.classList.remove('show');
+            reviewContainer.innerHTML = '';
+            reviewBtn.innerHTML = '<i class="fas fa-list"></i> Review Answers';
             
             // Reinitialize quiz
             initQuiz();
@@ -627,6 +992,7 @@
             // Show first question
             document.getElementById('question-0').classList.add('active');
             updateProgress();
+            updateQuestionNav();
         }
 
         // Start the quiz
