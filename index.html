@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة كويز هياكل البيانات</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --success: #00b894;
+            --danger: #d63031;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .quiz-container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+        }
+        
+        .quiz-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quiz-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(30deg) translate(-30%, -30%); }
+            100% { transform: rotate(30deg) translate(30%, 30%); }
+        }
+        
+        .quiz-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: white;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 5px;
+        }
+        
+        .question-container {
+            padding: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question-container.active {
+            display: block;
+        }
+        
+        .question {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .option {
+            background-color: var(--light);
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: var(--secondary);
+        }
+        
+        .option.selected {
+            background-color: var(--secondary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .option.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .option.wrong {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .option input {
+            display: none;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(108, 92, 231, 0.4);
+        }
+        
+        button:disabled {
+            background: #b2b2b2;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-container {
+            padding: 30px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result-container.show {
+            display: block;
+            animation: bounceIn 0.7s ease;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .score {
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .feedback {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: var(--dark);
+        }
+        
+        .emoji {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent);
+            opacity: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .quiz-container {
+                border-radius: 15px;
+            }
+            
+            .question {
+                font-size: 1.1rem;
+            }
+            
+            .option {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>لعبة كويز هياكل البيانات</h1>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+        </div>
+        
+        <!-- الأسئلة ستضاف هنا بالجافاسكريبت -->
+        
+        <div class="result-container">
+            <div class="emoji" id="emoji">🎉</div>
+            <div class="score" id="final-score">0%</div>
+            <div class="feedback" id="feedback">جيد، لكن يمكنك التحسن!</div>
+            <button id="restart">العب مرة أخرى</button>
+        </div>
+    </div>
+
+    <script>
+        // الأسئلة والمعلومات
+        const quizData = [
+            {
+                question: "ما المبدأ الذي يتبعه الـ Stack؟",
+                options: [
+                    "First In First Out (FIFO)",
+                    "Last In Last Out (LILO)",
+                    "Last In First Out (LIFO)",
+                    "First In Last Out (FILO)"
+                ],
+                answer: 2
+            },
+            {
+                question: "أي عملية تقوم بإضافة عنصر إلى قمة الـ Stack؟",
+                options: [
+                    "pop()",
+                    "peek()",
+                    "enqueue()",
+                    "push()"
+                ],
+                answer: 3
+            },
+            {
+                question: "ما هو تعقيد الوقت لحلقة for التي تتكرر n مرات، مثل for(i=0; i<n; i++)؟",
+                options: [
+                    "O(n²)",
+                    "O(logn)",
+                    "O(n)",
+                    "O(1)"
+                ],
+                answer: 2
+            },
+            {
+                question: "أي هيكل بيانات يعرف بأنه هيكل بيانات خطي يتبع مبدأ First In First Out (FIFO)؟",
+                options: [
+                    "Stack",
+                    "Array List",
+                    "Linked List",
+                    "Queue"
+                ],
+                answer: 3
+            },
+            {
+                question: "ما هو عيب الـ Array Lists (المصفوفات الديناميكية)؟",
+                options: [
+                    "وصول بطيء عن طريق الفهرس",
+                    "حجم ثابت",
+                    "إدراج/حذف مكلف في المنتصف",
+                    "لا يوجد تغيير حجم ديناميكي"
+                ],
+                answer: 2
+            },
+            {
+                question: "أي نوع من الـ Linked Lists لم يتم ذكره في المستند؟",
+                options: [
+                    "Singly Linked List",
+                    "Circular Linked List",
+                    "Multi-way Linked List",
+                    "Doubly Linked List"
+                ],
+                answer: 2
+            },
+            {
+                question: "في شجرة البحث الثنائية (BST)، ما هي العلاقة بين الابن الأيسر، الجذر، والابن الأيمن؟",
+                options: [
+                    "Left > Root < Right",
+                    "Left < Root > Right",
+                    "Left = Root = Right",
+                    "Left < Root < Right"
+                ],
+                answer: 3
+            },
+            {
+                question: "ما هي العملية الأساسية للـ Queue؟",
+                options: [
+                    "pop()",
+                    "insert()",
+                    "dequeue()",
+                    "delete()"
+                ],
+                answer: 2
+            },
+            {
+                question: "ما هي ميزة الـ Linked Lists مقارنة بالـ Array Lists؟",
+                options: [
+                    "وصول سريع عن طريق الفهرس",
+                    "إدراج/حذف فعال",
+                    "تغيير حجم ديناميكي",
+                    "وصول مباشر للعناصر"
+                ],
+                answer: 1
+            },
+            {
+                question: "ما هو عيب شجرة البحث الثنائية؟",
+                options: [
+                    "بحث/إدراج/حذف بطيء في الأشجار المتوازنة",
+                    "يمكن أن يتحول إلى وقت خطي في الأشجار غير المتوازنة",
+                    "لا يمكن تخزين قيم مكررة",
+                    "يتطلب ذاكرة أكبر لكل عقدة من الـ linked list"
+                ],
+                answer: 1
+            }
+        ];
+
+        // العناصر الأساسية
+        const quizContainer = document.querySelector('.quiz-container');
+        const questionContainer = document.querySelector('.question-container');
+        const resultContainer = document.querySelector('.result-container');
+        const progressBar = document.getElementById('progress');
+        const finalScore = document.getElementById('final-score');
+        const feedback = document.getElementById('feedback');
+        const emoji = document.getElementById('emoji');
+        const restartBtn = document.getElementById('restart');
+
+        // المتغيرات
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = Array(quizData.length).fill(null);
+
+        // تهيئة الكويز
+        function initQuiz() {
+            // إنشاء عناصر الأسئلة
+            quizData.forEach((question, index) => {
+                const qContainer = document.createElement('div');
+                qContainer.className = `question-container ${index === 0 ? 'active' : ''}`;
+                qContainer.id = `question-${index}`;
+                
+                let optionsHTML = '';
+                question.options.forEach((option, optIndex) => {
+                    optionsHTML += `
+                        <label class="option" data-index="${optIndex}">
+                            <input type="radio" name="q${index}" value="${optIndex}">
+                            ${option}
+                        </label>
+                    `;
+                });
+                
+                qContainer.innerHTML = `
+                    <div class="question">${index + 1}. ${question.question}</div>
+                    <div class="options">${optionsHTML}</div>
+                    <div class="navigation">
+                        <button class="prev-btn" ${index === 0 ? 'disabled' : ''}>السابق</button>
+                        <button class="next-btn">${index === quizData.length - 1 ? 'انهاء' : 'التالي'}</button>
+                    </div>
+                `;
+                
+                questionContainer.parentNode.insertBefore(qContainer, resultContainer);
+            });
+            
+            // إضافة أحداث
+            addEventListeners();
+            updateProgress();
+        }
+
+        // إضافة الأحداث
+        function addEventListeners() {
+            // أحداث الأزرار
+            document.querySelectorAll('.next-btn').forEach(btn => {
+                btn.addEventListener('click', goToNextQuestion);
+            });
+            
+            document.querySelectorAll('.prev-btn').forEach(btn => {
+                btn.addEventListener('click', goToPrevQuestion);
+            });
+            
+            // أحداث الخيارات
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', selectOption);
+            });
+            
+            // زر إعادة المحاولة
+            restartBtn.addEventListener('click', restartQuiz);
+        }
+
+        // اختيار خيار
+        function selectOption(e) {
+            const option = e.currentTarget;
+            const questionIndex = parseInt(option.parentElement.parentElement.id.split('-')[1]);
+            const optionIndex = parseInt(option.dataset.index);
+            
+            // إلغاء تحديد جميع الخيارات في هذا السؤال
+            document.querySelectorAll(`#question-${questionIndex} .option`).forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // تحديد الخيار الحالي
+            option.classList.add('selected');
+            userAnswers[questionIndex] = optionIndex;
+            
+            // تمكين زر التالي إذا كان هناك إجابة
+            document.querySelector(`#question-${questionIndex} .next-btn`).disabled = false;
+        }
+
+        // الانتقال إلى السؤال التالي
+        function goToNextQuestion() {
+            // التحقق من وجود إجابة
+            if (userAnswers[currentQuestion] === null && !document.querySelector(`#question-${currentQuestion} .next-btn`).disabled) {
+                alert('الرجاء اختيار إجابة قبل المتابعة');
+                return;
+            }
+            
+            // إذا كان هذا آخر سؤال، عرض النتائج
+            if (currentQuestion === quizData.length - 1) {
+                showResults();
+                return;
+            }
+            
+            // إخفاء السؤال الحالي
+            document.getElementById(`question-${currentQuestion}`).classList.remove('active');
+            
+            // زيادة العداد
+            currentQuestion++;
+            
+            // إظهار السؤال الجديد
+            document.getElementById(`question-${currentQuestion}`).classList.add('active');
+            
+            // تحديث زر السابق
+            document.querySelector(`#question-${currentQuestion} .prev-btn`).disabled = currentQuestion === 0;
+            
+            // تحديث التقدم
+            updateProgress();
+        }
+
+        // الانتقال إلى السؤال السابق
+        function goToPrevQuestion() {
+            // إخفاء السؤال الحالي
+            document.getElementById(`question-${currentQuestion}`).classList.remove('active');
+            
+            // تقليل العداد
+            currentQuestion--;
+            
+            // إظهار السؤال الجديد
+            document.getElementById(`question-${currentQuestion}`).classList.add('active');
+            
+            // تحديث زر السابق
+            document.querySelector(`#question-${currentQuestion} .prev-btn`).disabled = currentQuestion === 0;
+            
+            // تحديث التقدم
+            updateProgress();
+        }
+
+        // تحديث شريط التقدم
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / quizData.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // عرض النتائج
+        function showResults() {
+            // حساب النتيجة
+            score = 0;
+            quizData.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                }
+            });
+            
+            const percentage = (score / quizData.length) * 100;
+            
+            // عرض النتيجة
+            finalScore.textContent = `${percentage.toFixed(0)}%`;
+            
+            // عرض التعليق
+            if (percentage >= 90) {
+                feedback.textContent = "ممتاز! أنت خبير في هياكل البيانات!";
+                emoji.textContent = "🤩";
+            } else if (percentage >= 70) {
+                feedback.textContent = "جيد جداً! لديك فهم قوي للموضوع";
+                emoji.textContent = "😊";
+            } else if (percentage >= 50) {
+                feedback.textContent = "ليس سيئاً! مع المزيد من الممارسة ستتحسن";
+                emoji.textContent = "🙂";
+            } else {
+                feedback.textContent = "حاول مرة أخرى! راجع المواد الدراسية";
+                emoji.textContent = "😕";
+            }
+            
+            // إخفاء الأسئلة وإظهار النتائج
+            document.getElementById(`question-${currentQuestion}`).classList.remove('active');
+            resultContainer.classList.add('show');
+            
+            // إطلاق الألعاب النارية إذا كانت النتيجة جيدة
+            if (percentage >= 70) {
+                createConfetti();
+            }
+        }
+
+        // إنشاء تأثير الألعاب النارية
+        function createConfetti() {
+            const colors = ['#6c5ce7', '#a29bfe', '#fd79a8', '#00b894', '#d63031'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.top = '-10px';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = `${Math.random() * 10 + 5}px`;
+                
+                document.body.appendChild(confetti);
+                
+                // تحريك القطع
+                const animationDuration = Math.random() * 3 + 2;
+                confetti.style.animation = `fall ${animationDuration}s linear forwards`;
+                
+                // إضافة أنيميشن للسقوط
+                const keyframes = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(${window.innerHeight + 10}px) rotate(${Math.random() * 360}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                
+                const style = document.createElement('style');
+                style.innerHTML = keyframes;
+                document.head.appendChild(style);
+                
+                // إزالة العنصر بعد الانتهاء
+                setTimeout(() => {
+                    confetti.remove();
+                    style.remove();
+                }, animationDuration * 1000);
+            }
+        }
+
+        // إعادة الكويز
+        function restartQuiz() {
+            // إعادة تعيين المتغيرات
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = Array(quizData.length).fill(null);
+            
+            // إخفاء النتائج
+            resultContainer.classList.remove('show');
+            
+            // إعادة تعيين الأسئلة
+            document.querySelectorAll('.question-container').forEach((q, index) => {
+                q.classList.remove('active');
+                if (index === 0) q.classList.add('active');
+                
+                // إعادة تعيين الخيارات المحددة
+                q.querySelectorAll('.option').forEach(opt => {
+                    opt.classList.remove('selected', 'correct', 'wrong');
+                });
+                
+                // تعطيل زر التالي
+                q.querySelector('.next-btn').disabled = index === 0 ? true : false;
+            });
+            
+            // تحديث التقدم
+            updateProgress();
+        }
+
+        // بدء الكويز
+        initQuiz();
+    </script>
+</body>
+</html>
