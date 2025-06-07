@@ -481,8 +481,11 @@
             option.querySelector('input').checked = true;
             userAnswers[questionIndex] = optionIndex;
             
-            // Enable next button
-            document.querySelector(`#question-${questionIndex} .next-btn`).disabled = false;
+            // Enable next button - FIX APPLIED HERE
+            const nextButton = document.querySelector(`#question-${questionIndex} .next-btn`);
+            if (nextButton) { // Check if the element was found before attempting to use it
+                nextButton.disabled = false;
+            }
         }
 
         // Go to next question
